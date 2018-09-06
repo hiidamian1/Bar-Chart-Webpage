@@ -34,26 +34,32 @@
 		const height = 400-margin.top-margin.bottom;
 
 		//format of percentages
-		const formatPercent = d3.format("%.0");
+		const formatPercent = d3.format(".0%");
 
 		//x and y scale
-		var yScale = d3.scale.linear().range([height,0]);
-		var xScale = d3.scale.ordinal().rangeRoundBands([0,width],0.1,0.2);
+		var yScale = d3.scaleLinear().range([height,0]);
+		var xScale = d3.scaleBand().rangeRound([0,width],0.1,0.2);
 
 		//colors
-		const c10 = d3.scale.category10();
+		const c10 = d3.schemeCategory10;
 
 		//scalable vector graphic (svg)
 		var svg = d3.select("body")
-			.append("svg").attr({"width":width+margin.length+margin.right, "height":height+margin.top+margin.bottom})
+			.append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
 			.append("g")
-			.attr("transform","translate("+margin.left+","+margin.right+")");
+			.attr("transform","translate(" + margin.left + "," + margin.right + ")");
 
-		d3.tsv("http://simplysanad.com/d3js/words.tsv", function(data){
-
+		d3.csv("https://raw.githubusercontent.com/neo4j-examples/neo4j-foodmart-dataset/master/data/sales.csv", function(data){
+			console.log(data);
 			//set domains of x and y scales
-			yScale.domain([0,d3.max(data, function(d){return d.frequency;})]);
-			xScale.domain(data.map(function(d){return d.letter;}));
+			yScale.domain([0,d3.max(data, function(d){
+				return d.store_sales;
+			})]);
+			xScale.domain(data.map(function(d){
+				return d.store_id;
+			}));
 
 			//create x and y axes
 			var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
@@ -67,17 +73,26 @@
 						.attr("width", xScale.rangeBand())
 						.attr("fill", "steelblue")
 						.attr("fill", function(d, i){
-							return c10(Math.random*10*i)
+							return c10(Math.random * 10 * i)
 						})
 						.attr("y", function(d){
-							return yScale(d.frequency);
+							return yScale(d.store_sales);
 						})
 						.attr("x", function(d){
-							return xScale(d.letter);
+							return xScale(d.store_id);
 						})
 						.attr("height", function(d){
-							return height-yScale(d.frequency);
+							return height - yScale(d.store_sales);
 						});
+
+			svg.append("g")
+			.attr("transform", "translate(0," + height + ")")
+			.call(xAxis)
+			.attr("class", "x axis");
+
+			svg.append("g")
+			.attr("class", "y axis")
+			.call(yAxis);
 
 		});
 		/*d3.csv("https://raw.githubusercontent.com/neo4j-examples/neo4j-foodmart-dataset/master/data/customer.csv").then(function (d){

@@ -34,15 +34,15 @@
 		const height = 400-margin.top-margin.bottom;
 
 		//format of percentages
-		const formatPercent = d3.format(".0%");
+		//const formatPercent = d3.format(".0%");
 
 		//x and y scale
 		var yScale = d3.scaleLinear().range([height,0]);
 		var xScale = d3.scaleBand().rangeRound([0,width],0.1,0.2);
 
 		//colors
-		const c10 = d3.schemeCategory10;
-
+		const c10 = d3.scaleOrdinal(d3.schemeCategory10);
+		console.log(c10(Math.random * 10));
 		//scalable vector graphic (svg)
 		var svg = d3.select("body")
 			.append("svg")
@@ -51,38 +51,53 @@
 			.append("g")
 			.attr("transform","translate(" + margin.left + "," + margin.right + ")");
 
-		d3.csv("https://raw.githubusercontent.com/neo4j-examples/neo4j-foodmart-dataset/master/data/sales.csv", function(data){
-			console.log(data);
-			//set domains of x and y scales
-			yScale.domain([0,d3.max(data, function(d){
-				return d.store_sales;
-			})]);
-			xScale.domain(data.map(function(d){
-				return d.store_id;
-			}));
+		d3.csv("https://raw.githubusercontent.com/neo4j-examples/neo4j-foodmart-dataset/master/data/sales.csv").then(function(data){
+			//console.log(data);
+			//console.log(1 + '1');
+			//build dict mapping store_id to unit_sales
+			var total_sales = new Map();
+			for (var i = 0; i < data.length; i++){
+				if (total_sales.has(data[i].store_id)){
+					total_sales.set(data[i].store_id, total_sales.get(data[i].store_id) + (+data[i].unit_sales));
+				} else {
+					total_sales.set(data[i].store_id, +data[i].unit_sales);
+				}
+			}
 
+			//console.log(typeof([1,2,3]));
+
+			//set domains of x and y scales			
+			yScale.domain([0,d3.max(Array.from(total_sales.values()))]);
+			xScale.domain(Array.from(total_sales.keys()));
+
+			var total_sales_arr = Array.from(total_sales.entries());
+			//console.log(test);
+			/*for (i = 0; i < 10; i++){
+				console.log(test[i][0]);
+			}*/
+			
 			//create x and y axes
-			var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
-			var yAxis = d3.svg.axis().scale(yScale).orient("left").tickFormat(formatPercent);
+			var xAxis = d3.axisBottom(xScale);
+			var yAxis = d3.axisLeft(yScale);
 
 			var bars = svg.selectAll("rect")
-						.data(data)
+						.data(total_sales_arr)
 						.enter()
 						.append("rect")
 						.attr("class", "bar")
-						.attr("width", xScale.rangeBand())
+						.attr("width", xScale.bandwidth())
 						.attr("fill", "steelblue")
 						.attr("fill", function(d, i){
-							return c10(Math.random * 10 * i)
+							return c10(Math.random() * 10 * i);
 						})
 						.attr("y", function(d){
-							return yScale(d.store_sales);
+							return yScale(d[1]);
 						})
 						.attr("x", function(d){
-							return xScale(d.store_id);
+							return xScale(d[0]);
 						})
 						.attr("height", function(d){
-							return height - yScale(d.store_sales);
+							return height - yScale(d[1]);
 						});
 
 			svg.append("g")
@@ -93,7 +108,7 @@
 			svg.append("g")
 			.attr("class", "y axis")
 			.call(yAxis);
-
+		
 		});
 		/*d3.csv("https://raw.githubusercontent.com/neo4j-examples/neo4j-foodmart-dataset/master/data/customer.csv").then(function (d){
 			console.log(d[0]);

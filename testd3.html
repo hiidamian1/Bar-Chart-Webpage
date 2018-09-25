@@ -12,11 +12,9 @@
             	stroke: #000;
             	shape-rendering: crispEdges;
             }
-
             .x.axis path {
             	display: none;
             }
-
             body {
             	font: 10px arial;
             	text-align: center;
@@ -33,16 +31,13 @@
 		const width = 800-margin.left-margin.right;
 		const height = 400-margin.top-margin.bottom;
 
-		//format of percentages
-		//const formatPercent = d3.format(".0%");
-
 		//x and y scale
 		var yScale = d3.scaleLinear().range([height,0]);
 		var xScale = d3.scaleBand().rangeRound([0,width],0.1,0.2);
-
+		
 		//colors
 		const c10 = d3.scaleOrdinal(d3.schemeCategory10);
-		console.log(c10(Math.random * 10));
+
 		//scalable vector graphic (svg)
 		var svg = d3.select("body")
 			.append("svg")
@@ -50,11 +45,11 @@
 			.attr("height", height + margin.top + margin.bottom)
 			.append("g")
 			.attr("transform","translate(" + margin.left + "," + margin.right + ")");
-
+		
+		//read data
 		d3.csv("https://raw.githubusercontent.com/neo4j-examples/neo4j-foodmart-dataset/master/data/sales.csv").then(function(data){
-			//console.log(data);
-			//console.log(1 + '1');
-			//build dict mapping store_id to unit_sales
+
+			//build Map mapping store_id to unit_sales
 			var total_sales = new Map();
 			for (var i = 0; i < data.length; i++){
 				if (total_sales.has(data[i].store_id)){
@@ -64,22 +59,18 @@
 				}
 			}
 
-			//console.log(typeof([1,2,3]));
-
 			//set domains of x and y scales			
 			yScale.domain([0,d3.max(Array.from(total_sales.values()))]);
 			xScale.domain(Array.from(total_sales.keys()));
 
+			//convert total_sales map to array for use with d3
 			var total_sales_arr = Array.from(total_sales.entries());
-			//console.log(test);
-			/*for (i = 0; i < 10; i++){
-				console.log(test[i][0]);
-			}*/
 			
 			//create x and y axes
 			var xAxis = d3.axisBottom(xScale);
 			var yAxis = d3.axisLeft(yScale);
 
+			//draw bars and set needed attributes using d3
 			var bars = svg.selectAll("rect")
 						.data(total_sales_arr)
 						.enter()
@@ -87,6 +78,7 @@
 						.attr("class", "bar")
 						.attr("width", xScale.bandwidth())
 						.attr("fill", "steelblue")
+						//fill bars with a random color
 						.attr("fill", function(d, i){
 							return c10(Math.random() * 10 * i);
 						})
@@ -104,17 +96,10 @@
 			.attr("transform", "translate(0," + height + ")")
 			.call(xAxis)
 			.attr("class", "x axis");
-
 			svg.append("g")
 			.attr("class", "y axis")
 			.call(yAxis);
 		
 		});
-		/*d3.csv("https://raw.githubusercontent.com/neo4j-examples/neo4j-foodmart-dataset/master/data/customer.csv").then(function (d){
-			console.log(d[0]);
-
-			d3.select("body").append("p").text("2019 Cannondale CAADX 105 SE").style("font-family", "arial", "font-size", "60px");
-			d3.select("body").append("table").selectAll("tr").data(parsed).enter().append("tr").selectAll("td").data(function (d) {return d;}).enter().append("td").text(function (d) {return d;});
-		});*/
 	</script>
 </html>

@@ -65,7 +65,7 @@
 
 			//convert total_sales map to array for use with d3
 			var total_sales_arr = Array.from(total_sales.entries());
-			
+			//console.log(total_sales_arr[1]);
 			//create x and y axes
 			var xAxis = d3.axisBottom(xScale);
 			var yAxis = d3.axisLeft(yScale);
@@ -83,6 +83,7 @@
 							return c10(Math.random() * 10 * i);
 						})
 						.attr("y", function(d){
+							console.log(d[1]);
 							return yScale(d[1]);
 						})
 						.attr("x", function(d){

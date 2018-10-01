@@ -1,0 +1,27 @@
+const express = require('express');
+const path = require('path');
+const d3 = require('d3');
+
+const app = express();
+app.use(express.static('public'));
+
+const dataTools = require('./data.js');
+
+app.get('/', function (req, res){
+	res.sendFile(path.join(__dirname, 'd3withsql.html'));
+	//console.log("hello");
+});
+
+app.get('/retrieve-data', function (req, res){
+	dataTools.retrieveData(req.query, function(error, data){
+		//console.log(dataTools.formatData(data));
+		res.json(dataTools.formatData(data));
+	});
+});
+
+
+/*dataTools.retrieveData({"category": 'P'}, function (error, data){
+	console.log(dataTools.formatData(data));
+})*/
+
+app.listen(8080);

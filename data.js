@@ -8,9 +8,40 @@ function retrieveData (params, callback) {
 		database: "d3_proj"
 	});
 
-	var sql = "select * from store_data, product_id_to_category where category in (?, ?, ?) and product_id = distinct_pid";
+	var params_arr = params.categories.split(',');
 
-	connection.query(sql, [params.category, 'C', 'A'], function(err, result){
+	var sql = "select * from store_data, product_id_to_category";
+
+	if (params.startdate || params.enddate){
+		sql += ", times";
+	}
+	
+	sql += " where category in (?";
+
+	for (var i = 0; i < params_arr.length - 1; i++){
+		sql += ", ?";
+	}
+	sql += ") and product_id = distinct_pid"; 
+
+	
+	var datequery;
+	if (params.startdate && params.enddate){
+		datequery = " and yyyymmdd between ? and ? and times.time_id = store_data.time_id";
+		params_arr.push(params.startdate);
+		params_arr.push(params.enddate);
+	} else if (params.startdate){
+		datequery = " and yyyymmdd > ? and times.time_id = store_data.time_id";
+		params_arr.push(params.startdate);
+	} else if (params.enddate){
+		datequery = " and yyyymmdd < ? and times.time_id = store_data.time_id";
+		params_arr.push(params.enddate);
+	} else {
+		datequery = "";
+	}
+
+	sql += datequery;
+
+	connection.query(sql, params_arr, function(err, result){
 		if (err) throw err;
 		callback(false, result);
 	})
@@ -69,7 +100,6 @@ function formatData(data){
 	//convert stack_vals_map to appropriate format for d3.stack()
 	returned.stack_vals = Array.from(stack_vals_map.values());
 
-	//console.log(returned);
 	return returned;
 }
 

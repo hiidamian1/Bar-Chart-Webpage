@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+		<script
+		  src="https://code.jquery.com/jquery-3.3.1.min.js"
+		  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+		  crossorigin="anonymous"></script>
+        <style>
+            .axis path,
+            .axis line {
+            	fill: none;
+            	stroke: #000;
+            	shape-rendering: crispEdges;
+            }
+
+            .x.axis path {
+            	display: none;
+            }
+
+            body {
+            	font: 10px arial;
+            	text-align: center;
+            }
+        </style>
+    </head>
+    
+    <body>
+    </body>
+
+	<script>
+		//margins for graph
+		const margin = {top:20, right:30, bottom:30, left:40};
+		const width = 800-margin.left-margin.right;
+		const height = 500-margin.top-margin.bottom;
+
+		//x and y scale
+		var yScale = d3.scaleLinear().rangeRound([height,0]);
+		var xScale = d3.scaleBand().rangeRound([0,width]).paddingInner(0.05).align(0.1);
+
+		//colors
+		var c10 = d3.scaleOrdinal(d3.schemeCategory10);
+
+		//scalable vector graphic (svg)
+		var svg = d3.select("body")
+			.append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom + 20)
+			.append("g")
+			.attr("transform","translate(" + margin.left + "," + margin.right + ")");
+
+		//request data from server
+		$.get("http://localhost:8080/retrieve-data?categories=<%= categories %>&startdate=<%= startdate %>&enddate=<%= enddate %>", function (json){
+
+			//set x and y domains
+			yScale.domain([0,json.y]);
+			xScale.domain(json.x);
+
+			//map colors to product categories
+			c10.domain(json.stack_keys);
+
+
+			//create x and y axes
+			var xAxis = d3.axisBottom(xScale);
+			var yAxis = d3.axisLeft(yScale);
+
+			//hover tooltip
+		    var tooltip = d3.select("body")
+		    .append("div")
+		    .style("position", "absolute")
+		    .style("z-index", "10")
+		    .style("visibility", "hidden")
+		    .style("background", "#000");
+
+		    tooltip.append("rect")
+		    .attr("width", 60)
+		    .attr("height", 60)
+		    .attr("fill", "white")
+		    .style("opacity", 0.75);
+
+		    tooltip.append("text")
+		    .attr("x", 30)
+		    .attr("dy", "1.2em")
+		    .style("text-anchor", "middle")
+		    .attr("font-size", "12px")
+		    .attr("font-weight", "bold");
+
+			//create horizontal grid lines
+			svg.append("g")
+			.selectAll("g")
+			.data(d3.stack().keys(json.stack_keys)(json.stack_vals))
+			.enter().append("g")
+			.attr("fill", function(d){
+				return c10(d.key);
+			})
+			.attr("class", "grid")
+			//create bars
+			.selectAll("rect")
+						.data(function(d){
+							return d;
+						})
+						.enter()
+						.append("rect")
+						.attr("class", "bar")
+						.attr("width", xScale.bandwidth())
+						.attr("y", function(d){
+							return yScale(d[1]);
+						})
+						.attr("x", function(d){
+							return xScale(d.data.store_id) + 20;
+						})
+						.attr("height", function(d){
+							return yScale(d[0]) - yScale(d[1]);
+						})
+						.on("mouseover", function (d){
+							d3.select(this).attr("opacity", 0.5);
+							tooltip.html(d[1] - d[0]);
+							tooltip.style("visibility", "visible");
+						})
+						.on("mouseout", function (){
+							d3.select(this).attr("opacity", 1);
+							tooltip.style("visibility", "hidden");
+						})
+						.on("mousemove", function(d){tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px").html(d[1] - d[0]);});
+
+			svg.append("g")
+			.attr("transform", "translate(20," + height + ")")
+			.call(xAxis)
+			.attr("class", "x axis");
+
+			svg.append("g")
+			.attr("transform", "translate(20, 0)")
+			.attr("class", "y axis")
+			.call(yAxis)
+
+			svg.append("text")             
+			.attr("transform", "translate(" + (width/2) + " ," + (height + margin.top + 20) + ")")
+			.style("text-anchor", "middle")
+			.text("Store ID");
+
+			svg.append("text")
+			.attr("transform", "rotate(-90)")
+			.attr("y", 0 - margin.left)
+			.attr("x",0 - (height / 2))
+			.attr("dy", "1em")
+			.style("text-anchor", "middle")
+			.text("Total Units Sold");  
+
+		  	var legend = svg.append("g")
+		      .attr("font-family", "sans-serif")
+		      .attr("font-size", 10)
+		      .attr("text-anchor", "end")
+		    .selectAll("g")
+		    .data(json.stack_keys.slice().reverse())
+		    .enter().append("g")
+		      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+		  	legend.append("rect")
+		      .attr("x", width + 1)
+		      .attr("width", 19)
+		      .attr("height", 19)
+		      .attr("fill", c10);
+
+		  	legend.append("text")
+		      .attr("x", width - 4)
+		      .attr("y", 9.5)
+		      .attr("dy", "0.32em")
+		      .text(function(d) { return d; });
+		});
+	</script>
+</html>

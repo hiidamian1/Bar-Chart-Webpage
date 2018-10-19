@@ -51,7 +51,7 @@ function formatData(data){
 	//data is an array of RowDataPacket, a type of JS object. Loop through array, perform necessary sums, 
 	//return in form that HTML file can directly use to plot. x is an array of store ids, y is the largest total sale value
 	//for a store, stack keys -> array of distinct metric (in this case, unique categories, could also be product_ids, etc), 
-	//stack values -> array of JS objects, each representing a store, whose keys are the distinct metric and values are number of times that metric occurs.
+	//stack values -> array of JS objects, each representing a store, whose keys are the distinct metric (categories) and values are the number of times each metric occurs.
 	
 	//initialize return object with default values. These should ALL be replaced by the end of the function.
 	var returned = {"x": [], "y": 0, "stack_keys": [], "stack_vals": []};
@@ -91,14 +91,19 @@ function formatData(data){
 
 	});
 
-	//sort store ids
-	returned.x.sort();
-
 	//set y to largest total sales value
 	returned.y = Math.max(...Object.values(totals));
 
 	//convert stack_vals_map to appropriate format for d3.stack()
 	returned.stack_vals = Array.from(stack_vals_map.values());
+
+	//sort returned values
+	returned.x.sort(function (a,b){
+		return a - b;
+	});
+	returned.stack_keys.sort();
+	returned.stack_vals.sort();
+
 
 	return returned;
 }

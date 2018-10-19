@@ -1,4 +1,0 @@
-name,phonenumber
-damian,3
-daniel,4
-mom,5

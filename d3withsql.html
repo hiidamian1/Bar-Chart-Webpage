@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+		<script
+		  src="https://code.jquery.com/jquery-3.3.1.min.js"
+		  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+		  crossorigin="anonymous"></script>
+        <style>
+            .axis path,
+            .axis line {
+            	fill: none;
+            	stroke: #000;
+            	shape-rendering: crispEdges;
+            }
+
+            .x.axis path {
+            	display: none;
+            }
+
+            body {
+            	font: 10px arial;
+            	text-align: center;
+            }
+        </style>
+
+		<title>Bar Chart Homepage</title>
+
+    </head>
+    
+    <body>
+    	<h3>Please select the product categories you would like to compare:</h3>
+		<form id = "options">
+			<input type = "checkbox", name = "categories[]" value = 'A' checked>A
+			<input type = "checkbox", name = "categories[]" value = 'B'>B
+			<input type = "checkbox", name = "categories[]" value = 'C'>C
+			<input type = "checkbox", name = "categories[]" value = 'D'>D
+			<input type = "checkbox", name = "categories[]" value = 'E'>E
+			<input type = "checkbox", name = "categories[]" value = 'F'>F
+			<input type = "checkbox", name = "categories[]" value = 'G'>G
+			<input type = "checkbox", name = "categories[]" value = 'H'>H
+			<input type = "checkbox", name = "categories[]" value = 'I'>I
+			<input type = "checkbox", name = "categories[]" value = 'J'>J
+			<input type = "checkbox", name = "categories[]" value = 'K'>K
+			<input type = "checkbox", name = "categories[]" value = 'L'>L
+			<input type = "checkbox", name = "categories[]" value = 'M'>M
+			<input type = "checkbox", name = "categories[]" value = 'N'>N
+			<input type = "checkbox", name = "categories[]" value = 'O'>O
+			<input type = "checkbox", name = "categories[]" value = 'P'>P
+			<br><br>
+			Start Date: <input type = "date", id = startdate>
+			<br><br>
+			End Date: <input type = "date", id = "enddate">
+			<br><br>
+			<input type = "submit">
+		</form>
+    </body>
+
+	<script src = "display.js"></script>
+</html>

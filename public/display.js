@@ -28,6 +28,7 @@ function displayChart(submission){
 		.append("g")
 		.attr("transform","translate(" + margin.left + "," + margin.right + ")");
 
+	//retrieve inputs
 	var categories_arr = document.getElementsByName("categories[]");
 	var categories = [];
 	for (var i = 0; i < categories_arr.length; i++){
@@ -98,6 +99,7 @@ function displayChart(submission){
 		.attr("class", "y axis")
 		.call(yAxis)
 
+		//create axes text
 		svg.append("text")             
 		.attr("transform", "translate(" + (width/2) + " ," + (height + margin.top + 20) + ")")
 		.style("text-anchor", "middle")
@@ -111,6 +113,7 @@ function displayChart(submission){
 		.style("text-anchor", "middle")
 		.text("Total Units Sold");  
 
+		//create legend
 	  	var legend = svg.append("g")
 	      .attr("font-family", "sans-serif")
 	      .attr("font-size", 10)

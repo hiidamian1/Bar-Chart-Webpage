@@ -10,12 +10,12 @@ function retrieveData (params, callback) {
 
 	var params_arr = params.categories.split(',');
 
+	//build query
 	var sql = "select * from store_data, product_id_to_category";
 
 	if (params.startdate || params.enddate){
 		sql += ", times";
 	}
-	
 	sql += " where category in (?";
 
 	for (var i = 0; i < params_arr.length - 1; i++){
@@ -41,6 +41,7 @@ function retrieveData (params, callback) {
 
 	sql += datequery;
 
+	//execute query and return result
 	connection.query(sql, params_arr, function(err, result){
 		if (err) throw err;
 		callback(false, result);
@@ -48,10 +49,10 @@ function retrieveData (params, callback) {
 }
 
 function formatData(data){
-	//data is an array of RowDataPacket, a type of JS object. Loop through array, perform necessary sums, 
-	//return in form that HTML file can directly use to plot. x is an array of store ids, y is the largest total sale value
-	//for a store, stack keys -> array of distinct metric (in this case, unique categories, could also be product_ids, etc), 
-	//stack values -> array of JS objects, each representing a store, whose keys are the distinct metric (categories) and values are the number of times each metric occurs.
+	/*data is an array of RowDataPacket, a type of JS object. Loop through array, perform necessary sums, 
+	return in form that HTML file can directly use to plot. x is an array of store ids. y is the largest total sale value
+	for a store. stack_keys is an array of product categories. stack_values is an array of JS objects, each representing a store, 
+	whose keys are the product categories and values are the number of times each category occurs.*/
 	
 	//initialize return object with default values. These should ALL be replaced by the end of the function.
 	var returned = {"x": [], "y": 0, "stack_keys": [], "stack_vals": []};
@@ -78,7 +79,7 @@ function formatData(data){
 			returned.stack_keys.push(salesObj.category);
 		}
 
-		//
+		//build stack_values array
 		if (stack_vals_map.has(+salesObj.store_id)){
 			if (stack_vals_map.get(+salesObj.store_id).hasOwnProperty(salesObj.category)){
 				stack_vals_map.get(+salesObj.store_id)[salesObj.category] += salesObj.unit_sales;

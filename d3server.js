@@ -3,7 +3,6 @@ const path = require('path');
 const d3 = require('d3');
 
 const app = express();
-app.set('view engine', 'ejs');
 app.use(express.static('public'));
 
 const dataTools = require('./data.js');
